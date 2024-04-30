@@ -11,7 +11,7 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
-        TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, true);
+        //TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, true);
     }
     void Update()
     {
@@ -44,7 +44,7 @@ public class MainMenu : MonoBehaviour
 
             }
             PlayerPrefs.SetInt("IntValue", intValue);
-            SceneManager.LoadScene("SampleScene");
+            SceneManager.LoadScene("Map");
 
         }
     }
