@@ -4,6 +4,7 @@ using PedometerU;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class Person : MonoBehaviour
 {
@@ -69,7 +70,10 @@ public class Person : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("Main Menu");
+        }
     }
 
     //private void OnDisable()
