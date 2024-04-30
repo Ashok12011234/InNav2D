@@ -8,11 +8,26 @@ using System.Linq;
 public class Person : MonoBehaviour
 {
     private int totalSteps = 0;
-    private Pedometer pedometer;
+    //private Pedometer pedometer;
     Vector3 startVector;
     float singleStepDistance = 0.05f;
     public float compassSmooth = 50.5f;
     private float m_lastMagneticHeading = 0f;
+
+    public float loLim = 0.005f; // level to fall to the low state 0.005
+    public float hiLim = 0.1f; // level to go to high state (and detect step) 0.1 
+    public int steps = 0; // step counter - counts when comp state goes high private 
+    bool stateH = false; // comparator state
+
+    public float fHigh = 20.0f; // noise filter control - reduces frequencies above fHigh private 10
+    public float curAcc = 0f; // noise filter 
+    public float fLow = 0.05f; // average gravity filter control - time constant about 1/fLow 0.1
+    float avgAcc = 0f;
+  
+    void Awake()
+    {
+        avgAcc = Input.acceleration.magnitude; // initialize avg filter
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -35,9 +50,9 @@ public class Person : MonoBehaviour
                 break;
         }
 
-        pedometer = new Pedometer(OnStep);
+        //pedometer = new Pedometer(OnStep);
         // Reset UI
-        OnStep(0, 0);
+        //OnStep(0, 0);
 
         Input.location.Start();
         // Start the compass.
@@ -45,51 +60,24 @@ public class Person : MonoBehaviour
 
     }
 
-    private void OnStep(int steps, double distance)
-    {
-
-        totalSteps = steps;
-    }
-
-    // Update is called once per frame
-    //void Update()
+    //private void OnStep(int steps, double distance)
     //{
-    //    float distanceToMove = totalSteps * singleStepDistance;
-    //    transform.position = startVector + new Vector3(0, distanceToMove, 0);
 
-    //    float currentMagneticHeading = (float)Math.Round(Input.compass.magneticHeading, 2);
-    //    if (m_lastMagneticHeading < currentMagneticHeading - compassSmooth || m_lastMagneticHeading > currentMagneticHeading + compassSmooth)
-    //    {
-    //        m_lastMagneticHeading = currentMagneticHeading;
-    //        transform.rotation = Quaternion.Euler(0, 0, m_lastMagneticHeading);
-    //    }
+    //    totalSteps = steps;
     //}
 
+    // Update is called once per frame
     void Update()
     {
-        // Calculate the distance to move based on total steps
-        float distanceToMove = totalSteps * singleStepDistance;
 
-        // Get the current compass heading
-        float currentMagneticHeading = (float)Math.Round(Input.compass.magneticHeading, 2);
-
-        // Calculate the forward direction based on the compass heading
-        Vector3 forwardDirection = Quaternion.Euler(0, 0, currentMagneticHeading) * Vector3.forward;
-
-        // Move the object in the forward direction
-        transform.position = startVector + forwardDirection * distanceToMove;
-
-        // Rotate the object to match the compass heading
-        transform.rotation = Quaternion.Euler(0, 0, currentMagneticHeading);
     }
 
-
-    private void OnDisable()
-    {
-        // Release the pedometer
-        pedometer.Dispose();
-        pedometer = null;
-    }
+    //private void OnDisable()
+    //{
+    //    // Release the pedometer
+    //    pedometer.Dispose();
+    //    pedometer = null;
+    //}
 
     void OnGUI()
     {
@@ -106,14 +94,83 @@ public class Person : MonoBehaviour
         float y = centerY - (height / 2);
 
         // Make a text field that modifies stringToEdit
-        string outText = "Total Steps: " + totalSteps.ToString() + " compasssss : " + Input.compass.trueHeading.ToString();
+        string outText = "Total Steps: " + steps.ToString() + " compasssss : " + Input.compass.trueHeading.ToString();
 
         GUIStyle style = new GUIStyle(GUI.skin.textField);
         style.fontSize = 26;
 
-
-
         GUI.TextField(new Rect(x, y, width, height), outText, style);
 
     }
+
+    
+    void FixedUpdate()
+    {
+        // Get the current compass heading
+        float currentMagneticHeading = (float)Math.Round(Input.compass.magneticHeading, 2);
+
+
+        // Rotate the object to match the compass heading
+        transform.rotation = Quaternion.Euler(0, 0, -currentMagneticHeading);
+
+        // filter input.acceleration using Lerp
+        curAcc = Mathf.Lerp(curAcc, Input.acceleration.magnitude, Time.deltaTime * fHigh);
+        avgAcc = Mathf.Lerp(avgAcc, Input.acceleration.magnitude, Time.deltaTime * fLow);
+        float delta = curAcc - avgAcc; // gets the acceleration pulses
+        if (!stateH)
+        { // if state == low...
+            if (delta > hiLim)
+            { // only goes high if input > hiLim
+                stateH = true;
+                steps++; // count step when comp goes high
+                movePerson();
+            }
+        }
+        else
+        {
+            if (delta < loLim)
+            { // only goes low if input < loLim 
+                stateH = false;
+            }
+        }
+    }
+
+    double DegreesToRadians(double degrees)
+    {
+        return (Math.PI / 180) * degrees;
+    }
+
+    void movePerson()
+    {
+        double y = 0;
+        double x = 0;
+
+        if (m_lastMagneticHeading >= 0 && m_lastMagneticHeading < 90)
+        {
+            y = -Math.Sin(DegreesToRadians(m_lastMagneticHeading)) * singleStepDistance;
+            x = Math.Cos(DegreesToRadians(m_lastMagneticHeading)) * singleStepDistance;
+        }
+        else if (m_lastMagneticHeading >= 90 && m_lastMagneticHeading < 180)
+        {
+            y = -Math.Sin(DegreesToRadians(m_lastMagneticHeading - 90)) * singleStepDistance;
+            x = -Math.Cos(DegreesToRadians(m_lastMagneticHeading - 90)) * singleStepDistance;
+        }
+        else if (m_lastMagneticHeading >= 180 && m_lastMagneticHeading < 270)
+        {
+            y = Math.Sin(DegreesToRadians(m_lastMagneticHeading - 180)) * singleStepDistance;
+            x = -Math.Cos(DegreesToRadians(m_lastMagneticHeading - 180)) * singleStepDistance;
+        }
+        else if (m_lastMagneticHeading >= 270 && m_lastMagneticHeading < 360)
+        {
+            y = Math.Sin(DegreesToRadians(m_lastMagneticHeading - 270)) * singleStepDistance;
+            x = Math.Cos(DegreesToRadians(m_lastMagneticHeading - 270)) * singleStepDistance;
+        }
+        else
+        {
+            Console.WriteLine("default case");
+        }
+
+        transform.Translate(new Vector3((float)x, (float)y, 0));
+    }
+
 }
