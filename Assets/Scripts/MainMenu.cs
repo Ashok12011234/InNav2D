@@ -9,10 +9,6 @@ public class MainMenu : MonoBehaviour
     [SerializeField] InputField inputField;
     [SerializeField] Text resultText;
 
-    void Start()
-    {
-        //TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, true);
-    }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
