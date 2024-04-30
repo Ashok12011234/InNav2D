@@ -11,7 +11,7 @@ public class Person : MonoBehaviour
     private int totalSteps = 0;
     //private Pedometer pedometer;
     Vector3 startVector;
-    float singleStepDistance = 0.05f;
+    float singleStepDistance = 0.1f;
     public float compassSmooth = 50.5f;
     private float m_lastMagneticHeading = 0f;
 
@@ -36,7 +36,7 @@ public class Person : MonoBehaviour
         switch (PlayerPrefs.GetInt("IntValue"))
         {
             case 1:
-                startVector = new Vector3(-1.1f, -1.9f, 0);
+                startVector = new Vector3(-0.714f, -2.55f, 0);
                 transform.position = startVector;
                 break;
             case 2:
@@ -46,7 +46,7 @@ public class Person : MonoBehaviour
                 go.transform.position = new Vector3(32.8f, 0, -392f);
                 break;
             default:
-                startVector = new Vector3(-1.1f, -1.9f, 0);
+                startVector = new Vector3(-0.714f, -2.55f, 0);
                 transform.position = startVector;
                 break;
         }
@@ -90,15 +90,18 @@ public class Person : MonoBehaviour
         float centerY = Screen.height / 2;
 
         // Define the size of the text box
-        float width = 700;
-        float height = 400;
+        float width = 500;
+        float height = 50;
+
+        // Define the margin from the top of the screen
+        float margin = 150;
 
         // Calculate the position of the text box
         float x = centerX - (width / 2);
-        float y = centerY - (height / 2);
+        float y = margin;
 
         // Make a text field that modifies stringToEdit
-        string outText = "Total Steps: " + steps.ToString() + " compasssss : " + Input.compass.trueHeading.ToString();
+        string outText = "Total Steps: " + steps.ToString() + " compass : " + Input.compass.trueHeading.ToString();
 
         GUIStyle style = new GUIStyle(GUI.skin.textField);
         style.fontSize = 26;
@@ -107,7 +110,6 @@ public class Person : MonoBehaviour
 
     }
 
-    
     void FixedUpdate()
     {
         // Get the current compass heading
