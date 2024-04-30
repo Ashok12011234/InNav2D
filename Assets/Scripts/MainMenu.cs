@@ -13,6 +13,13 @@ public class MainMenu : MonoBehaviour
     {
         TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, true);
     }
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+    }
 
     public void ValidateInput()
     {
