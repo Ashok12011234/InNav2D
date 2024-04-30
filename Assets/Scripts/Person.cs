@@ -4,6 +4,7 @@ using PedometerU;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class Person : MonoBehaviour
 {
@@ -67,6 +68,11 @@ public class Person : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("Main Menu");
+        }
+
         // Calculate the distance to move based on total steps
         float distanceToMove = totalSteps * singleStepDistance;
 
