@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using PedometerU;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +7,6 @@ using UnityEngine.SceneManagement;
 
 public class Person : MonoBehaviour
 {
-    private int totalSteps = 0;
-    //private Pedometer pedometer;
     Vector3 startVector;
     float singleStepDistance = 0.1f;
     public float compassSmooth = 50.5f;
@@ -51,21 +48,11 @@ public class Person : MonoBehaviour
                 break;
         }
 
-        //pedometer = new Pedometer(OnStep);
-        // Reset UI
-        //OnStep(0, 0);
-
         Input.location.Start();
         // Start the compass.
         Input.compass.enabled = true;
 
     }
-
-    //private void OnStep(int steps, double distance)
-    //{
-
-    //    totalSteps = steps;
-    //}
 
     // Update is called once per frame
     void Update()
@@ -75,13 +62,6 @@ public class Person : MonoBehaviour
             SceneManager.LoadScene("Main Menu");
         }
     }
-
-    //private void OnDisable()
-    //{
-    //    // Release the pedometer
-    //    pedometer.Dispose();
-    //    pedometer = null;
-    //}
 
     void OnGUI()
     {
@@ -114,7 +94,6 @@ public class Person : MonoBehaviour
     {
         // Get the current compass heading
         float currentMagneticHeading = (float)Math.Round(Input.compass.magneticHeading, 2);
-
 
         // Rotate the object to match the compass heading
         transform.rotation = Quaternion.Euler(0, 0, -currentMagneticHeading);
